@@ -9,7 +9,7 @@ import os
 
 
 df = pd.read_csv("heartfeature.csv")
-# Model dosya yollarını sabit olarak tanımla
+#Define model file paths as constants
 MODEL_PATHS = {
     "Logistic Regression": "logistic_regression_best_model.joblib",
     "K-Nearest Neighbors": "k-nearest_neighbors_best_model.joblib",
@@ -33,23 +33,23 @@ st.set_page_config(
 
 
 
-# Modelleri yükleme fonksiyonu
+# Models loading function
 @st.cache_resource
 def load_models():
     models = {name: joblib.load(path) for name, path in MODEL_PATHS.items()}
     return models
 
-# Tahmin fonksiyonu
+# Prediction function
 def predict(model, input_data):
     loaded_model = model
     prediction = loaded_model.predict(input_data)
     return prediction
 
-# Ana uygulama fonksiyonu
 
 
 
-# Ana sayfa içeriği
+
+# Homepage
 def home():
     # Ana sayfa içeriği
     st.title("❤️ Happy Hearts: ML-Powered Heart Disease Prediction")
@@ -65,12 +65,11 @@ def presentation():
     )
 
 
-# Görselleştirme sayfası içeriği
+# Visualitazion Page
 def visualization():
     st.subheader("Görselleştirme Sayfası")
 
-    # Burada görselleştirme fonksiyonlarını ekleyebilirsiniz
-    # Örneğin:
+    
     crosstab_df = pd.crosstab(df["sex"], df["target"])
 
     st.subheader("Heart Disease Frequency for Sex")
@@ -99,7 +98,7 @@ def visualization():
     # roc_curve_plot(fpr, tpr)
     #######
     #######
-    # Boxplot görselleştirmesi
+    # Boxplot 
     st.subheader("Boxplot: Age vs. Thalach by Target")
     fig, ax = plt.subplots(figsize=(15, 8))
     sns.boxplot(x='age', y='thalach', hue='target', data=df, ax=ax)
@@ -111,11 +110,10 @@ def visualization():
     #######
     #######
 
-    # Özellik önem sıralamasını görselleştirme
+    # Feature importance
 
 
-# Ana uygulama
-# ... Diğer kodlar ...
+
 
 def main():
     gif_path = "kalp.gif"
@@ -137,34 +135,33 @@ def main():
         presentation()
 
     elif choice == "Predict":
-        # Model yükle
+        # Load model
         models = load_models()
 
         st.subheader("Predict")
 
-        # Kullanıcıdan giriş verilerini al
+        # Get data from user
         input_data, sex = get_user_input()
 
-        # Model seçme kutusu
+        # Model selection box
         selected_model = st.sidebar.selectbox("Select a model", list(MODEL_PATHS.keys()), key="model_selectbox")
 
-        # İlk tahminden önce orijinal modelin kopyasını al
+        # Copy of first model
         initial_model = deepcopy(models[selected_model])
 
-        # Tahmin sonucunu sıfırlamak için değişken
+        # Variable to reset the prediction result
         prediction_result = None
 
         if st.button("Predict", key="predict_button"):
-            # Model tahmini yapma
+            # Prediction
             prediction = predict(models[selected_model], input_data)
 
-            # Tahmin sonucunu sakla
             prediction_result = "KALP RAHATSIZLIĞI YOK 💖" if prediction[0] == 0 else "KALP RAHATISZLIĞI VAR 💔"
 
-            # Tahmin sonucunu ekrana yazdırma
+            # Printing the prediction result to the screen
             if prediction_result == "KALP RAHATISZLIĞI VAR 💔":
                 st.error(f"Kullanılan Model {selected_model}: {prediction_result}")
-                # Cinsiyete göre resim göster
+                # Show image by gender
                 if sex == "Kadın":
                     st.image("kadin.jpg", caption="", use_column_width=False)
                 elif sex == "Erkek":
@@ -172,7 +169,7 @@ def main():
             else:
                 st.success(f"Kullanılan Model {selected_model}: {prediction_result}")
 
-                # No Heart Disease durumunda kalp simgesi gösterme ve balonları ekleme
+                #Show heart icon and add balloons in case of No Heart Disease
                 if prediction_result == "KALP RAHATSIZLIĞI YOK 💖":
                     heart_image_path = "health.jpg"  # Kalp simgesinin gerçek yolunu belirtin
                     if os.path.exists(heart_image_path):
@@ -181,11 +178,11 @@ def main():
                     else:
                         st.warning("Warning: Heart image not found at the specified path.")
 
-            # Modeli ve tahmin sonucunu sıfırla
+            # Reset model and prediction result
             models[selected_model] = initial_model
             prediction_result = None
 
-# ... Diğer kodlar ...
+# ... Others
 
 def get_user_input():
     age = st.slider("Yaş:", min_value=29, max_value=79, value=40)
@@ -205,7 +202,7 @@ def get_user_input():
     ca = st.slider(" Damarlardaki Kalsiyum Birikimi (0 : Yok - 1 : Çok az - 2 : Orta - 3 : yüksek ):", min_value=0, max_value=3, value=0)
     thal = st.slider("Thalassemi, kandaki hemoglobin proteini etkilenme (1 : Az - 2 : Orta - 3 : Yüksek)):", min_value=1, max_value=3, value=2)
 
-    # Kullanıcının girişini modele uygun formata getir
+    # Convert the user's input to the appropriate format for the model
     input_data = pd.DataFrame({
         'age': [age],
         'sex': [sex_Male],
